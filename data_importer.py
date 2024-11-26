@@ -6,33 +6,8 @@ from qdrant_client.models import VectorParams, Distance, PointStruct
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 import torch
-import uuid
 import argparse
 from loguru import logger as log
-
-
-#docker run -d --name qdrant -p 6333:6333 -v /Users/mohammad/Desktop/text-to-image-search/qdrant:/qdrant/storage qdrant/qdrant
-#python data_importer.py  -f products_1.json --num=10
-
-# def search_query(query_text, top_k=1):
-
-#     inputs = clip_processor(text=query_text, return_tensors="pt").to(device)
-#     with torch.no_grad():
-#         query_embedding = clip_model.get_text_features(**inputs)
-#         query_embedding = query_embedding.cpu().numpy().flatten()
-    
-#     results = qdrant_client.search(
-#         collection_name=collection_name,
-#         query_vector=query_embedding.tolist(),
-#         limit=top_k,
-#         with_payload=True,
-#     )
-#     return results
-
-# query = "Designed with a flattering V-neck and a midi length, this dress is perfect for any occasion. The tier detail adds a touch of sophistication, while the delicate lace trim detail adds a feminine charm"
-# search_results = search_query(query)
-# for result in search_results:
-#     print(f"Product ID: {result.payload['name']}, Score: {result.score}")
 
 
 def import_data(args):
@@ -68,9 +43,9 @@ def import_data(args):
         
         points = [
             PointStruct(
-                id=uuid.uuid4().__str__(), 
+                id=str(product['id']), 
                 vector=embedding.tolist(),
-                payload={"product_id": str(product['id']), **product},
+                payload={**product},
             )
             for embedding in embeddings
         ]
@@ -105,7 +80,7 @@ if __name__=='__main__':
                         type=int,default=100)
     
     try:
-        args=parser.parse_args()
+        args = parser.parse_args()
         import_data(args)
     except Exception as e:
         log.error(str(e))
