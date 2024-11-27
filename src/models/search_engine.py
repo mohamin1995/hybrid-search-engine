@@ -66,10 +66,6 @@ class KeywordSearchEngine(SearchEngine):
     
     def search(self, q, k):
         print('im here @ search method [KeywordSearchEngine]')
-        
-
-
-#TODO all models in a file
 
 
         

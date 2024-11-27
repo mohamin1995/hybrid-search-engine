@@ -43,7 +43,7 @@ def import_data(args):
         
         points = [
             PointStruct(
-                id=str(product['id']), 
+                id=product['id'], 
                 vector=embedding.tolist(),
                 payload={**product},
             )

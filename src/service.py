@@ -1,25 +1,32 @@
 
 from fastapi import FastAPI, Query
 from qdrant_client import QdrantClient
-from models import SemanticSearchEngine
+from models.search_engine import SemanticSearchEngine
 from fastapi.middleware.cors import CORSMiddleware
+import configparser
+import uvicorn
 
+#TODO deployment
+#TODO keyword search
 #TODO think about filters
-#TODO config
-#TODO packaging
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins, replace "*" with specific domains if needed
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods
-    allow_headers=["*"],  # Allows all HTTP headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-qdrant_client = QdrantClient(url='http://localhost:6333')
-collection_name = 'products'
+qdrant_client = QdrantClient(url = config['production']['QdrantUrl'])
+collection_name = config['production']['CollectionName']
 
 sse = SemanticSearchEngine('semantic search engine', qdrant_client, collection_name)
 
@@ -33,3 +40,6 @@ async def search(
 ):
     results = sse.search(q, n)
     return results
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
