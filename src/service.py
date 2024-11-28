@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import configparser
 import uvicorn
 
-#TODO deployment
 #TODO keyword search
 #TODO think about filters
 

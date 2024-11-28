@@ -48,14 +48,28 @@ class SemanticSearchEngine(SearchEngine):
     
     def search(self, q, k):
         
+        
         query_embedding = self.embedding_model.get_embedding(q)
-        results = self.qdrant_client.search(
+        
+        search_results = self.qdrant_client.search(
         collection_name=self.collection_name,
         query_vector=query_embedding.tolist(),
-        limit=k,
+        limit=100,
         with_payload=True,
     )
-        return results
+        
+        product_ids = {result.payload["id"] for result in search_results}
+        print(type(search_results))
+        results = {}
+        for search_result in search_results:
+            if not search_result.payload["id"] in results:
+                results[search_result.payload["id"]] = search_result
+            
+            if len(results) >= k:
+                break
+             
+        
+        return list(results.values())
         
 
 class KeywordSearchEngine(SearchEngine):

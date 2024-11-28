@@ -1,0 +1,8 @@
+requests
+qdrant-client
+transformers
+Pillow
+torch
+loguru
+fastapi
+uvicorn

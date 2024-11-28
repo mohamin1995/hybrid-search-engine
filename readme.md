@@ -1,6 +1,8 @@
+# Fashion Search Engine
 
-docker run -d --name qdrant -p 6333:6333 -v /Users/mohammad/Desktop/text-to-image-search/qdrant:/qdrant/storage qdrant/qdrant
+In this project, a hybrid search engine has been developed that can search both in images and in the textual descriptions of products.
 
-python data_importer.py  -f data/products_1.json --num=2
+To deploy the project, simply run the following command:
 
-uvicorn service:app --reload
+```bash
+docker-compose up

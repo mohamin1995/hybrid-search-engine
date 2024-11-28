@@ -8,7 +8,7 @@ from PIL import Image
 import torch
 import argparse
 from loguru import logger as log
-
+import uuid
 
 def import_data(args):
     qdrant_client = QdrantClient(url=args.durl)
@@ -43,7 +43,7 @@ def import_data(args):
         
         points = [
             PointStruct(
-                id=product['id'], 
+                id=uuid.uuid4().__str__(), 
                 vector=embedding.tolist(),
                 payload={**product},
             )
