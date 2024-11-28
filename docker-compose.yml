@@ -12,6 +12,17 @@ services:
       - ./qdrant:/qdrant/storage
     restart: always
 
+  meilisearch:
+    image: getmeili/meilisearch
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+    networks:
+      - app-network
+    volumes:
+      - ./meili/meili_data:/meili_data
+    command: ["meilisearch", "--db-path", "/meili_data"]
+
   backend:
     build:
       context: ./src
@@ -27,6 +38,7 @@ services:
       - QDRANT_PORT=6333
     depends_on:
       - qdrant
+      - meilisearch
     restart: always
 
   frontend:

@@ -9,48 +9,68 @@ import torch
 import argparse
 from loguru import logger as log
 import uuid
+from meilisearch import Client
+
+
+
 
 def import_data(args):
-    qdrant_client = QdrantClient(url=args.durl)
+    
+    client = Client('http://127.0.0.1:7700')
+    index = None
+    
+    # try:
+    #     index = client.get_index(args.cname)
+    # except Exception as e:
+    #     log.warning(f"Index '{args.cname}' does not exist: {e}")
+    
+    # if index is not None:
+    index = client.create_index(args.cname, {'primaryKey': 'id'})
+    index = client.get_index(args.cname)
+    
+    # qdrant_client = QdrantClient(url=args.durl)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
-    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    # clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
+    # clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-    collection_name = args.cname
-
-    qdrant_client.recreate_collection(
-        collection_name=collection_name,
-        vectors_config=VectorParams(size=512, distance=Distance.COSINE),
-    )
+    # collection_name = args.cname
+    
+    # qdrant_client.recreate_collection(
+    #     collection_name=collection_name,
+    #     vectors_config=VectorParams(size=512, distance=Distance.COSINE),
+    # )
 
     with open(args.file) as f:
         products = json.load(f)
+    
+    index.add_documents(products)
+
         
-    for product in products[0:args.num]:
-        embeddings = []
-        for image_url in product['images']:
-            response = requests.get(image_url)
-            img = Image.open(BytesIO(response.content)).convert("RGB")
+    # for product in products[0:args.num]:
+    #     embeddings = []
+    #     for image_url in product['images']:
+    #         response = requests.get(image_url)
+    #         img = Image.open(BytesIO(response.content)).convert("RGB")
             
-            inputs = clip_processor(images=img, return_tensors="pt").to(device)
-            with torch.no_grad():
-                embedding = clip_model.get_image_features(**inputs)
-                embedding = embedding.cpu().numpy().flatten()
-                embeddings.append(embedding)
+    #         inputs = clip_processor(images=img, return_tensors="pt").to(device)
+    #         with torch.no_grad():
+    #             embedding = clip_model.get_image_features(**inputs)
+    #             embedding = embedding.cpu().numpy().flatten()
+    #             embeddings.append(embedding)
                 
         
-        points = [
-            PointStruct(
-                id=uuid.uuid4().__str__(), 
-                vector=embedding.tolist(),
-                payload={**product},
-            )
-            for embedding in embeddings
-        ]
-        qdrant_client.upsert(collection_name=collection_name, points=points)
-        log.info('embedding of product {} added to qdrant successfully',str(product['id']))
+    #     points = [
+    #         PointStruct(
+    #             id=uuid.uuid4().__str__(), 
+    #             vector=embedding.tolist(),
+    #             payload={**product},
+    #         )
+    #         for embedding in embeddings
+    #     ]
+    #     qdrant_client.upsert(collection_name=collection_name, points=points)
+    #     log.info('embedding of product {} added to qdrant successfully',str(product['id']))
         
     
 

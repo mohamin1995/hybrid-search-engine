@@ -6,3 +6,4 @@ torch
 loguru
 fastapi
 uvicorn
+meilisearch

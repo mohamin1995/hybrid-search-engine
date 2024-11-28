@@ -20,12 +20,12 @@ async function fetchProducts(query, n) {
     }
   
     products.forEach((product) => {
-      const payload = product.payload;
+      //const payload = product.payload;
       const productCard = `
         <div class="product-card">
-          <img src="${payload.images[0]}" alt="${payload.name}" />
-          <h3>${payload.name}</h3>
-          <p>${payload.current_price} ${payload.currency}</p>
+          <img src="${product.images[0]}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>${product.current_price} ${product.currency}</p>
           <a>View Product</a>
         </div>
       `;
