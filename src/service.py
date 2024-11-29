@@ -1,13 +1,12 @@
 
 from fastapi import FastAPI, Query
 from qdrant_client import QdrantClient
-from models.search_engine import SemanticSearchEngine,KeywordSearchEngine
+from models.search_engine import *
 from fastapi.middleware.cors import CORSMiddleware
 from meilisearch import Client
 import configparser
 import uvicorn
 
-#TODO search filters
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -33,14 +32,16 @@ index = client.get_index('products')
 sse = SemanticSearchEngine('semantic search engine', qdrant_client, collection_name)
 kse = KeywordSearchEngine('keyword search engine', index)
 
-
+hse = HybridSearchEngine('hybrid search engine', sse, kse, 0.2)
 
 @app.get("/search")
 async def search(
     q: str = Query('', title="Query String", description="The search query string"),
-    n: int = Query(5, title="Number of Results", description="Number of results to return")
+    n: int = Query(20, title="Number of Results", description="Number of results to return"),
+    p: float = Query(0.1,title="proportion of semantic results")
 ):
-    results = kse.search(q, n)
+    hse.semantic_proportion = p
+    results = hse.search(q, n)
     
     return results
 

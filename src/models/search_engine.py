@@ -49,6 +49,7 @@ class SemanticSearchEngine(SearchEngine):
     def search(self, q, k):
         
         query_embedding = self.embedding_model.get_embedding(q)
+        
         search_results = self.qdrant_client.search(
         collection_name=self.collection_name,
         query_vector=query_embedding.tolist(),
@@ -76,8 +77,35 @@ class KeywordSearchEngine(SearchEngine):
     
     def search(self, q, k):
         search_results = self.index.search(q)
-        print('im hereeeeeeeeeeeeeeeeeee')
-        return search_results['hits'][0:k]        
+        return search_results['hits'][0:k]
+    
+
+
+class HybridSearchEngine(SearchEngine):
+    
+    def __init__(self, name, semantic_search_engine : SearchEngine, keyword_search_engine: SearchEngine, semantic_proportion):
+        super().__init__(name)
+        self.semantic_search_engine = semantic_search_engine
+        self.keyword_search_engine = keyword_search_engine
+        self.semantic_proportion = semantic_proportion
+    
+    def search(self, q, k):
+        
+        k_semantic = int(self.semantic_proportion * k)
+        k_keyword = k - k_semantic
+        
+        keyword_results = self.keyword_search_engine.search(q,k_keyword)
+        semantic_results = self.semantic_search_engine.search(q,k_semantic)
+        
+        unique_products = {item['id']: item for item in keyword_results + semantic_results}
+
+        merged_products = list(unique_products.values())
+         
+        
+        return merged_products
+        
+        
+                
 
 
 
