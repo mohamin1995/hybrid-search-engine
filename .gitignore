@@ -2,7 +2,7 @@
 qdrant/*
 data/*
 __pycache__/
-.DS_Store/
-.DS_Build/
+.DS_Store/*
+.DS_Build/*
 meili/*
 

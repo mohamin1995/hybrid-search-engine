@@ -6,11 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from meilisearch import Client
 import configparser
 import uvicorn
-
+import os
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-
+print(config.sections())
 
 
 app = FastAPI()
@@ -23,22 +23,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-qdrant_client = QdrantClient(url = config['production']['QdrantUrl'])
-collection_name = config['production']['CollectionName']
+qdrant_client = QdrantClient(url = config[os.getenv('ENV')]['QdrantUrl'])
+collection_name = config[os.getenv('ENV')]['CollectionName']
 
-client = Client('http://meilisearch:7700')
-index = client.get_index('products')
+client = Client(config[os.getenv('ENV')]['MeiliUrl'])
+index = client.get_index(config[os.getenv('ENV')]['MeiliIndex'])
 
 sse = SemanticSearchEngine('semantic search engine', qdrant_client, collection_name)
 kse = KeywordSearchEngine('keyword search engine', index)
 
-hse = HybridSearchEngine('hybrid search engine', sse, kse, 0.2)
+hse = HybridSearchEngine('hybrid search engine', sse, kse, 0.7)
 
 @app.get("/search")
 async def search(
-    q: str = Query('', title="Query String", description="The search query string"),
-    n: int = Query(20, title="Number of Results", description="Number of results to return"),
-    p: float = Query(0.1,title="proportion of semantic results")
+    q: str = Query('', title="Query String"),
+    n: int = Query(20, title="Number of Results"),
+    p: float = Query(0.7,title="proportion of semantic results")
 ):
     hse.semantic_proportion = p
     results = hse.search(q, n)

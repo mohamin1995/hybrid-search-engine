@@ -1,4 +1,4 @@
-# Fashion Search Engine
+# Hybrid Search Engine
 
 In this project, a hybrid search engine has been developed that can search both in images and in the textual descriptions of products.
 

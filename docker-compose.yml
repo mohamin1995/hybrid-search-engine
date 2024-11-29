@@ -27,15 +27,14 @@ services:
     build:
       context: ./src
     container_name: backend_service
+    environment:
+      ENV: production
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
     ports:
       - "8000:8000"
     networks:
       - app-network
-    environment:
-      - QDRANT_HOST=qdrant
-      - QDRANT_PORT=6333
     depends_on:
       - qdrant
       - meilisearch
@@ -49,8 +48,6 @@ services:
       - "80:80"
     networks:
       - app-network
-    environment:
-      - BACKEND_URL=http://localhost:8000
     depends_on:
       - backend
     restart: always
